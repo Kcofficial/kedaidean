@@ -484,277 +484,82 @@
                             <span class="text-xs font-semibold text-slate-700">🛵 Diantar</span>
                         </label>
                         <label class="border border-slate-200 rounded-xl p-2 flex items-center gap-2 cursor-pointer hover:bg-slate-50 [&:has(input:checked)]:border-brand-500 [&:has(input:checked)]:bg-brand-50/50 transition">
-                            <input type="radio" name="orderType" value="Diambil Sendiri (Pick-up)" class="text-brand-600 focus:ring-brand-500">
-                            <span class="text-xs font-semibold text-slate-700">🛍️ Diambil</span>
+                            <input type="radio" name="orderType" value="Takeaway (Ambil Sendiri)" class="text-brand-600 focus:ring-brand-500">
+                            <span class="text-xs font-semibold text-slate-700">🛍️ Takeaway</span>
                         </label>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Catatan Tambahan (Opsional)</label>
-                    <textarea id="custNotes" rows="2" placeholder="Misal: Alamat pengantaran / sambal dipisah / es tehnya manis..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Alamat Pengiriman / Catatan Tambahan</label>
+                    <textarea id="custNotes" rows="2" placeholder="Sebutkan alamat lengkap / detail pesanan (misal: pedas, es sedikit, dsb)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
                 </div>
 
-                <div class="pt-2">
-                    <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition active:scale-98">
-                        <i class="fa-brands fa-whatsapp text-lg"></i>
-                        <span>Kirim Pesanan via WhatsApp</span>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeCheckoutModal()" class="w-1/3 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50">Kembali</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
+                        <i class="fa-brands fa-whatsapp text-base"></i> Kirim Pesanan WA
                     </button>
-                    <p class="text-[10px] text-slate-400 text-center mt-2">Pesan teks ringkasan pesanan akan otomatis terbuat di WhatsApp Kedai Dean.</p>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Custom Delete Confirmation Modal (Replaces native confirm) -->
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl text-center">
-            <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
-                <i class="fa-solid fa-trash"></i>
-            </div>
-            <h4 class="font-bold text-slate-900 text-sm">Hapus Menu?</h4>
-            <p id="deleteConfirmText" class="text-xs text-slate-500 mt-1 mb-4">Apakah Anda yakin ingin menghapus menu ini dari daftar?</p>
-            <div class="flex gap-2">
-                <button onclick="closeDeleteModal()" class="w-1/2 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs">Batal</button>
-                <button id="confirmDeleteBtn" class="w-1/2 py-2 rounded-xl bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700">Hapus</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
+    <!-- JavaScript Application Logic -->
     <script>
-        // Default Kedai Data Structure
-        const DEFAULT_STATE = {
-            kedaiStatus: 'OPEN', // 'OPEN', 'CLOSED', 'AWAY'
-            awayNote: 'Sedang keluar sebentar, kembali jam 16.30 WIB',
-            waNumber: '6289519824952', // Nomor WA Kedai Dean
-            isAdminLoggedIn: false,
-            adminPin: '1234',
-            showUnavailableToPublic: false,
-            activeCategory: 'Semua',
-            searchQuery: '',
-            cart: {}, // { menuId: quantity }
-            menus: [
-                // Makanan
-                {
-                    id: 'm1',
-                    name: 'Mie Ayam',
-                    category: 'Makanan',
-                    price: 10000,
-                    description: 'Mie ayam lezat gurih dengan topping ayam cincang & sayur segar.',
-                    emoji: '🍜',
-                    isReady: true
-                },
-                {
-                    id: 'm2',
-                    name: 'Mie Chili Oil',
-                    category: 'Makanan',
-                    price: 10000,
-                    description: 'Mie pedas gurih dipadu rasa chili oil khas Kedai Dean.',
-                    emoji: '🌶️',
-                    isReady: true
-                },
-                {
-                    id: 'm3',
-                    name: 'Nasi Cokot Ayam Suwir',
-                    category: 'Makanan',
-                    price: 5000,
-                    description: 'Nasi cokot praktis dengan isian ayam suwir bumbu pedas manis.',
-                    emoji: '🍙',
-                    isReady: true
-                },
-                {
-                    id: 'm4',
-                    name: 'Pangsit Kuah',
-                    category: 'Makanan',
-                    price: 10000,
-                    description: 'Pangsit lembut disajikan dengan kuah gurih hangat & rempah.',
-                    emoji: '🥟',
-                    isReady: true
-                },
-                // Camilan
-                {
-                    id: 'm5',
-                    name: 'Cireng Isi Ayam Suwir (1 bj)',
-                    category: 'Camilan',
-                    price: 2000,
-                    description: 'Cireng renyah garing dengan isian ayam suwir pedas nikmat.',
-                    emoji: '🍘',
-                    isReady: true
-                },
-                {
-                    id: 'm6',
-                    name: 'Gabin Tape (1 bj)',
-                    category: 'Camilan',
-                    price: 2000,
-                    description: 'Kue gabin renyah dengan olahan tape manis legit.',
-                    emoji: '🥠',
-                    isReady: true
-                },
-                {
-                    id: 'm7',
-                    name: 'Lumpia Ayam Suwir (1 bj)',
-                    category: 'Camilan',
-                    price: 2000,
-                    description: 'Lumpia goreng crispy isi ayam suwir mantap.',
-                    emoji: '🌯',
-                    isReady: true
-                },
-                {
-                    id: 'm8',
-                    name: 'Molen Mini (1 porsi)',
-                    category: 'Camilan',
-                    price: 10000,
-                    description: 'Molen mini pisang renyah dan manis seporsi mantap.',
-                    emoji: '🍌',
-                    isReady: true
-                },
-                // Minuman
-                {
-                    id: 'm9',
-                    name: 'Es Teh Jumbo',
-                    category: 'Minuman',
-                    price: 5000,
-                    description: 'Es teh segar melati porsi gelas jumbo penawar dahaga.',
-                    emoji: '🥤',
-                    isReady: true
-                }
-            ]
-        };
+        // Initial Mock Database
+        const initialMenuList = [
+            { id: '1', name: 'Nasi Goreng Special Dean', category: 'Makanan', price: 18000, desc: 'Nasi goreng gurih dengan telur, ayam suwir, dan kerupuk renyah.', emoji: '🍳', imageUrl: '', isReady: true },
+            { id: '2', name: 'Mie Goreng Dok Dok', category: 'Makanan', price: 16000, desc: 'Mie tumis bumbu rempah melimpah khas kedai.', emoji: '🍜', imageUrl: '', isReady: true },
+            { id: '3', name: 'Es Teh Manis Jumbo', category: 'Minuman', price: 5000, desc: 'Es teh segar manis pas dengan porsi jumbo memuaskan.', emoji: '🥤', imageUrl: '', isReady: true },
+            { id: '4', name: 'Es Jeruk Peras', category: 'Minuman', price: 7000, desc: 'Perasan jeruk murni dingin dan menyegarkan.', emoji: '🍹', imageUrl: '', isReady: true },
+            { id: '5', name: 'Cireng Crispy Bumbu Rujak', category: 'Camilan', price: 12000, desc: 'Cireng renyah di luar kenyal di dalam + cocolan rujak pedas manis.', emoji: '🥟', imageUrl: '', isReady: true },
+            { id: '6', name: 'Paket Hemat Ayam Geprek + Es Teh', category: 'Paket', price: 22000, desc: 'Nasi + Ayam Geprek sambal mantap + Es Teh manis.', emoji: '🍱', imageUrl: '', isReady: true }
+        ];
 
-        // App State initialization from LocalStorage
-        let appState = JSON.parse(localStorage.getItem('kedai_dean_data_v2')) || DEFAULT_STATE;
-
-        // Secret Logo Multi-click Counter variables
+        // State Management
+        let menuItems = JSON.parse(localStorage.getItem('kedai_dean_menu')) || initialMenuList;
+        let cart = {}; // format: { itemId: quantity }
+        let currentCategory = 'Semua';
+        let searchQuery = '';
+        let isAdmin = false;
         let logoClickCount = 0;
         let logoClickTimer = null;
 
-        function handleLogoClick() {
-            logoClickCount++;
-            clearTimeout(logoClickTimer);
+        // Settings State
+        let storeStatus = localStorage.getItem('kedai_dean_status') || 'OPEN'; // OPEN, AWAY, CLOSED
+        let awayNote = localStorage.getItem('kedai_dean_away_note') || '';
+        let waNumber = localStorage.getItem('kedai_dean_wa') || '6289519824952';
+        let adminPin = localStorage.getItem('kedai_dean_pin') || '1234';
+        let showUnavailable = localStorage.getItem('kedai_dean_show_unavailable') === 'true';
 
-            if (logoClickCount === 3) {
-                showToast('Ketuk 2 kali lagi untuk buka Akses Admin...', 'info');
-            }
-
-            if (logoClickCount >= 5) {
-                logoClickCount = 0;
-                toggleAdminView();
-                return;
-            }
-
-            logoClickTimer = setTimeout(() => {
-                logoClickCount = 0;
-            }, 2500);
-        }
-
-        function saveState() {
-            localStorage.setItem('kedai_dean_data_v2', JSON.stringify(appState));
-        }
-
-        // Notification Toast Handler
-        function showToast(message, type = 'info') {
-            const toastContainer = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderStatusBadge();
+            renderStatusBanner();
+            renderMenuItems();
+            updateCartBar();
             
-            let bgClass = 'bg-slate-900 text-white';
-            let icon = 'fa-circle-info';
+            // Set initial value in admin inputs
+            document.getElementById('adminWaInput').value = waNumber;
+            document.getElementById('adminStatusSelect').value = storeStatus;
+            document.getElementById('adminAwayNoteInput').value = awayNote;
+            document.getElementById('adminShowUnavailableCheck').checked = showUnavailable;
+            document.getElementById('footerWaText').innerText = '+' + waNumber;
+        });
 
-            if (type === 'success') {
-                bgClass = 'bg-emerald-600 text-white shadow-emerald-600/20';
-                icon = 'fa-circle-check';
-            } else if (type === 'error') {
-                bgClass = 'bg-rose-600 text-white shadow-rose-600/20';
-                icon = 'fa-circle-xmark';
-            } else if (type === 'warning') {
-                bgClass = 'bg-amber-500 text-white shadow-amber-500/20';
-                icon = 'fa-triangle-exclamation';
-            }
-
-            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl font-semibold text-xs transition-all transform translate-y-2 opacity-0 pointer-events-auto ${bgClass}`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${message}</span>`;
-
-            toastContainer.appendChild(toast);
-
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            });
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Format Currency Helper
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
-        }
-
-        // Render Header & Kedai Operational Status Badge
-        function renderHeaderStatus() {
-            const container = document.getElementById('statusBadgeContainer');
-            const banner = document.getElementById('statusBanner');
-            const statusSelect = document.getElementById('adminStatusSelect');
-            const awayNoteInput = document.getElementById('adminAwayNoteInput');
-            const footerWaText = document.getElementById('footerWaText');
-
-            if (statusSelect) statusSelect.value = appState.kedaiStatus;
-            if (awayNoteInput) awayNoteInput.value = appState.awayNote || '';
-            if (footerWaText) footerWaText.innerText = '+' + (appState.waNumber || '6289519824952');
-
-            let badgeHTML = '';
-            let bannerHTML = '';
-
-            if (appState.kedaiStatus === 'OPEN') {
-                badgeHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Buka
-                    </span>`;
-                banner.className = 'hidden';
-            } else if (appState.kedaiStatus === 'AWAY') {
-                badgeHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> Pergi
-                    </span>`;
-                bannerHTML = `
-                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-inner">
-                        <i class="fa-solid fa-person-walking-arrow-right text-base"></i>
-                        <span>Kedai Dean Sedang Pergi/Istirahat: "${appState.awayNote || 'Kembali sebentar lagi'}"</span>
-                    </div>`;
-                banner.className = 'block';
-                banner.innerHTML = bannerHTML;
-            } else { // CLOSED
-                badgeHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                        <span class="w-2 h-2 rounded-full bg-rose-500"></span> Tutup
-                    </span>`;
-                bannerHTML = `
-                    <div class="bg-gradient-to-r from-rose-600 to-rose-700 text-white px-4 py-2 text-center text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-inner">
-                        <i class="fa-solid fa-store-slash text-base"></i>
-                        <span>Kedai Dean sedang Close Order (Tutup). Silakan cek menu untuk persiapan order berikutnya!</span>
-                    </div>`;
-                banner.className = 'block';
-                banner.innerHTML = bannerHTML;
-            }
-
-            container.innerHTML = badgeHTML;
-        }
-
-        // Render Category Filter Slider
+        // Dynamic Categories Render
+        const categories = ['Semua', 'Makanan', 'Minuman', 'Camilan', 'Paket'];
         function renderCategories() {
             const container = document.getElementById('categoryContainer');
-            const categories = ['Semua', 'Makanan', 'Minuman', 'Camilan', 'Paket'];
-            
             container.innerHTML = categories.map(cat => {
-                const isActive = appState.activeCategory === cat;
+                const active = cat === currentCategory;
                 return `
-                    <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                        isActive 
-                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30 scale-105' 
-                        : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                    <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
+                        active 
+                            ? 'bg-brand-500 text-white shadow-md shadow-brand-500/30 scale-105' 
+                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                     }">
                         ${cat}
                     </button>
@@ -763,125 +568,145 @@
         }
 
         function setCategory(cat) {
-            appState.activeCategory = cat;
+            currentCategory = cat;
             renderCategories();
-            renderMenuGrid();
+            renderMenuItems();
         }
 
+        // Handle Search
         function handleSearch() {
-            const val = document.getElementById('searchInput').value;
-            appState.searchQuery = val.toLowerCase();
+            const input = document.getElementById('searchInput');
+            searchQuery = input.value.toLowerCase().trim();
             const clearBtn = document.getElementById('clearSearchBtn');
-            if (val.length > 0) {
+            if (searchQuery.length > 0) {
                 clearBtn.classList.remove('hidden');
             } else {
                 clearBtn.classList.add('hidden');
             }
-            renderMenuGrid();
+            renderMenuItems();
         }
 
         function clearSearch() {
             document.getElementById('searchInput').value = '';
-            appState.searchQuery = '';
+            searchQuery = '';
             document.getElementById('clearSearchBtn').classList.add('hidden');
-            renderMenuGrid();
+            renderMenuItems();
         }
 
-        // Render Main Menu Grid Cards
-        function renderMenuGrid() {
+        // Render Status Badges & Banners
+        function renderStatusBadge() {
+            const container = document.getElementById('statusBadgeContainer');
+            let badgeHtml = '';
+            if (storeStatus === 'OPEN') {
+                badgeHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> BUKA
+                </span>`;
+            } else if (storeStatus === 'AWAY') {
+                badgeHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> ISTIRAHAT
+                </span>`;
+            } else {
+                badgeHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span> TUTUP
+                </span>`;
+            }
+            container.innerHTML = badgeHtml;
+        }
+
+        function renderStatusBanner() {
+            const banner = document.getElementById('statusBanner');
+            if (storeStatus === 'AWAY') {
+                banner.className = "bg-amber-500 text-white text-xs font-semibold py-2.5 px-4 text-center border-b border-amber-600 flex items-center justify-center gap-2";
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>Kedai Sedang Istirahat / Keluar Sebentar: ${awayNote || 'Kembali sebentar lagi'}</span>`;
+            } else if (storeStatus === 'CLOSED') {
+                banner.className = "bg-rose-600 text-white text-xs font-semibold py-2.5 px-4 text-center border-b border-rose-700 flex items-center justify-center gap-2";
+                banner.innerHTML = `<i class="fa-solid fa-store-slash"></i> <span>Mohon Maaf, Kedai Dean Saat Ini Sedang Close Order / Tutup.</span>`;
+            } else {
+                banner.className = "hidden";
+            }
+        }
+
+        // Render Menu Grid (MODIFIED: Admin buttons show ONLY when isAdmin = true)
+        function renderMenuItems() {
             const grid = document.getElementById('menuGrid');
             const emptyState = document.getElementById('emptyMenuState');
-            const menuCountBadge = document.getElementById('menuCountBadge');
-
-            let filtered = appState.menus.filter(m => {
-                const matchesCategory = appState.activeCategory === 'Semua' || m.category === appState.activeCategory;
-                const matchesSearch = m.name.toLowerCase().includes(appState.searchQuery) || (m.description && m.description.toLowerCase().includes(appState.searchQuery));
-                const readyCondition = appState.isAdminLoggedIn || appState.showUnavailableToPublic || m.isReady;
-
-                return matchesCategory && matchesSearch && readyCondition;
+            
+            let filtered = menuItems.filter(item => {
+                const matchCategory = currentCategory === 'Semua' || item.category === currentCategory;
+                const matchSearch = item.name.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery);
+                const matchAvailability = showUnavailable ? true : item.isReady;
+                return matchCategory && matchSearch && matchAvailability;
             });
 
-            menuCountBadge.innerText = `${filtered.length} Menu`;
+            document.getElementById('menuCountBadge').innerText = `${filtered.length} Menu`;
 
             if (filtered.length === 0) {
                 grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
+            } else {
+                emptyState.classList.add('hidden');
             }
 
-            emptyState.classList.add('hidden');
-
             grid.innerHTML = filtered.map(item => {
-                const qtyInCart = appState.cart[item.id] || 0;
-                const isClosedOrAway = appState.kedaiStatus !== 'OPEN';
+                const qty = cart[item.id] || 0;
+                
+                // Kondisi Tombol Admin disembunyikan jika bukan Admin
+                const adminControlsHtml = isAdmin ? `
+                    <div class="flex items-center gap-1">
+                        <button onclick="toggleMenuStatus('${item.id}')" title="Ubah Status Ready" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-emerald-600 flex items-center justify-center transition">
+                            <i class="fa-solid fa-power-off text-xs"></i>
+                        </button>
+                        <button onclick="openEditMenuModal('${item.id}')" title="Edit Menu" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="deleteMenu('${item.id}')" title="Hapus Menu" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                ` : '';
 
                 return `
-                    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between relative overflow-hidden group ${!item.isReady ? 'bg-slate-50 opacity-80' : ''}">
-                        
-                        <!-- Top Header in Card -->
-                        <div class="flex justify-between items-start mb-2.5">
-                            ${item.imageUrl ? `
-                                <img src="${item.imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-2xl shadow-inner group-hover:scale-105 transition duration-200" onerror="this.onerror=null; this.outerHTML='<div class=\'w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition duration-200\'>${item.emoji || '🍽️'}</div>';">
-                            ` : `
-                                <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition duration-200">
-                                    ${item.emoji || '🍽️'}
-                                </div>
-                            `}
-
-                            <div class="flex items-center gap-1">
-                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                                    item.isReady ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                }">
-                                    ${item.isReady ? 'Ready' : 'Habis'}
-                                </span>
-
-                                <!-- Quick Admin Actions -->
-                                ${appState.isAdminLoggedIn ? `
-                                    <button onclick="toggleStock('${item.id}')" title="Ubah Stok Ready/Habis" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs">
-                                        <i class="fa-solid fa-power-off ${item.isReady ? 'text-emerald-600' : 'text-rose-600'}"></i>
-                                    </button>
-                                    <button onclick="openEditMenuModal('${item.id}')" title="Edit Menu" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                    <button onclick="promptDeleteMenu('${item.id}')" title="Hapus Menu" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-
-                        <!-- Menu Information -->
+                    <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between relative ${!item.isReady ? 'opacity-60 bg-slate-50' : ''}">
                         <div>
-                            <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug mb-1">${item.name}</h3>
-                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">${item.description || 'Menu lezat siap saji khas Kedai Dean.'}</p>
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                ${item.imageUrl 
+                                    ? `<img src="${item.imageUrl}" alt="${item.name}" class="w-14 h-14 rounded-2xl object-cover border border-slate-100">`
+                                    : `<div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-2xl shadow-inner">
+                                        ${item.emoji || '🍲'}
+                                       </div>`
+                                }
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.isReady ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}">
+                                        ${item.isReady ? 'READY' : 'HABIS'}
+                                    </span>
+                                    ${adminControlsHtml}
+                                </div>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base leading-tight">${item.name}</h4>
+                            <p class="text-xs text-slate-500 mt-1 line-clamp-2">${item.desc || 'Menu lezat khas Kedai Dean'}</p>
                         </div>
 
-                        <!-- Bottom Price & Quantity Buttons -->
-                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between mt-1">
+                        <div class="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Harga</span>
-                                <span class="font-extrabold text-brand-600 text-sm sm:text-base">${formatRupiah(item.price)}</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">HARGA</span>
+                                <span class="text-sm font-extrabold text-brand-600">Rp ${item.price.toLocaleString('id-ID')}</span>
                             </div>
 
-                            ${!item.isReady ? `
-                                <span class="text-xs text-rose-500 font-bold px-2.5 py-1 bg-rose-50 rounded-xl">Stok Habis</span>
-                            ` : `
-                                <div class="flex items-center space-x-1.5">
-                                    ${qtyInCart > 0 ? `
-                                        <button onclick="updateCart('${item.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs transition active:scale-95">
-                                            -
-                                        </button>
-                                        <span class="font-extrabold text-xs text-slate-800 w-5 text-center">${qtyInCart}</span>
-                                    ` : ''}
-
-                                    <button onclick="updateCart('${item.id}', 1)" ${isClosedOrAway ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition ${
-                                        isClosedOrAway 
-                                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                                        : 'bg-brand-500 hover:bg-brand-600 text-white shadow-md shadow-brand-500/20 active:scale-95'
-                                    }">
-                                        <i class="fa-solid fa-plus text-[10px]"></i> ${qtyInCart > 0 ? 'Tambah' : 'Pesan'}
+                            ${item.isReady && storeStatus !== 'CLOSED' ? `
+                                ${qty > 0 ? `
+                                    <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                                        <button onclick="updateCart('${item.id}', ${qty - 1})" class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center font-bold text-xs shadow-sm active:scale-95 transition">-</button>
+                                        <span class="w-7 text-center font-extrabold text-xs text-slate-900">${qty}</span>
+                                        <button onclick="updateCart('${item.id}', ${qty + 1})" class="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold text-xs shadow-sm active:scale-95 transition">+</button>
+                                    </div>
+                                ` : `
+                                    <button onclick="updateCart('${item.id}', 1)" class="bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-md shadow-brand-500/20 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-plus"></i> Pesan
                                     </button>
-                                </div>
+                                `}
+                            ` : `
+                                <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">Tidak Tersedia</span>
                             `}
                         </div>
                     </div>
@@ -889,78 +714,42 @@
             }).join('');
         }
 
-        // Cart Actions
-        function updateCart(menuId, change) {
-            if (appState.kedaiStatus !== 'OPEN' && change > 0) {
-                showToast('Kedai sedang tidak menerima order saat ini.', 'warning');
-                return;
-            }
-
-            const currentQty = appState.cart[menuId] || 0;
-            const newQty = currentQty + change;
-
-            if (newQty <= 0) {
-                delete appState.cart[menuId];
+        // Cart Management
+        function updateCart(id, qty) {
+            if (qty <= 0) {
+                delete cart[id];
             } else {
-                appState.cart[menuId] = newQty;
+                cart[id] = qty;
             }
-
-            saveState();
-            renderMenuGrid();
-            renderCartBar();
-
-            // Refresh modal list if modal is open
-            if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
-                if (Object.keys(appState.cart).length === 0) {
-                    closeCheckoutModal();
-                } else {
-                    renderCheckoutItems();
-                }
-            }
-        }
-
-        function removeFromCart(menuId) {
-            delete appState.cart[menuId];
-            saveState();
-            renderMenuGrid();
-            renderCartBar();
-
-            if (Object.keys(appState.cart).length === 0) {
-                closeCheckoutModal();
-                showToast('Keranjang belanja dikosongkan', 'info');
-            } else {
-                renderCheckoutItems();
-            }
+            renderMenuItems();
+            updateCartBar();
         }
 
         function clearCart() {
-            appState.cart = {};
-            saveState();
-            renderMenuGrid();
-            renderCartBar();
+            cart = {};
+            renderMenuItems();
+            updateCartBar();
             closeCheckoutModal();
-            showToast('Keranjang berhasil dikosongkan', 'info');
         }
 
-        function renderCartBar() {
+        function updateCartBar() {
             const cartBar = document.getElementById('cartBar');
-            const cartBadgeCount = document.getElementById('cartBadgeCount');
+            const cartCountBadge = document.getElementById('cartBadgeCount');
             const cartTotalPrice = document.getElementById('cartTotalPrice');
 
             let totalItems = 0;
             let totalPrice = 0;
 
-            Object.keys(appState.cart).forEach(id => {
-                const item = appState.menus.find(m => m.id === id);
+            Object.keys(cart).forEach(id => {
+                const item = menuItems.find(m => m.id === id);
                 if (item) {
-                    const qty = appState.cart[id];
-                    totalItems += qty;
-                    totalPrice += item.price * qty;
+                    totalItems += cart[id];
+                    totalPrice += item.price * cart[id];
                 }
             });
 
-            cartBadgeCount.innerText = totalItems;
-            cartTotalPrice.innerText = formatRupiah(totalPrice);
+            cartCountBadge.innerText = totalItems;
+            cartTotalPrice.innerText = `Rp ${totalPrice.toLocaleString('id-ID')}`;
 
             if (totalItems > 0) {
                 cartBar.classList.remove('translate-y-full');
@@ -969,120 +758,131 @@
             }
         }
 
-        // Admin Auth
+        // Secret Admin Unlock Handler
+        function handleLogoClick() {
+            logoClickCount++;
+            clearTimeout(logoClickTimer);
+            logoClickTimer = setTimeout(() => {
+                logoClickCount = 0;
+            }, 2000);
+
+            if (logoClickCount >= 5) {
+                logoClickCount = 0;
+                toggleAdminView();
+            }
+        }
+
         function toggleAdminView() {
-            if (appState.isAdminLoggedIn) {
-                appState.isAdminLoggedIn = false;
-                document.getElementById('adminPanel').classList.add('hidden');
-                showToast('Keluar dari Mode Pengelola', 'info');
-                renderMenuGrid();
+            if (isAdmin) {
+                logoutAdmin();
             } else {
                 document.getElementById('adminPinModal').classList.remove('hidden');
-                document.getElementById('adminPinInput').value = '';
-                document.getElementById('pinErrorMessage').classList.add('hidden');
                 document.getElementById('adminPinInput').focus();
             }
         }
 
         function closeAdminPinModal() {
             document.getElementById('adminPinModal').classList.add('hidden');
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('pinErrorMessage').classList.add('hidden');
         }
 
         function submitAdminPin() {
-            const pin = document.getElementById('adminPinInput').value;
-            if (pin === (appState.adminPin || '1234')) {
-                appState.isAdminLoggedIn = true;
+            const inputPin = document.getElementById('adminPinInput').value;
+            if (inputPin === adminPin) {
+                isAdmin = true;
                 closeAdminPinModal();
                 document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('adminWaInput').value = appState.waNumber || '';
-                document.getElementById('adminShowUnavailableCheck').checked = appState.showUnavailableToPublic;
-                showToast('Login Pengelola Berhasil!', 'success');
-                renderMenuGrid();
+                renderMenuItems();
             } else {
                 document.getElementById('pinErrorMessage').classList.remove('hidden');
             }
         }
 
-        function saveNewAdminPin() {
-            const newPin = document.getElementById('adminChangePinInput').value.trim();
-            if (!newPin || newPin.length < 4) {
-                showToast('PIN minimal harus 4 angka/karakter', 'warning');
-                return;
-            }
-            appState.adminPin = newPin;
-            saveState();
-            document.getElementById('adminChangePinInput').value = '';
-            showToast('PIN Admin berhasil diganti!', 'success');
-        }
-
         function logoutAdmin() {
-            appState.isAdminLoggedIn = false;
+            isAdmin = false;
             document.getElementById('adminPanel').classList.add('hidden');
-            showToast('Mode Pengelola Ditutup', 'info');
-            renderMenuGrid();
+            renderMenuItems();
         }
 
-        function updateKedaiStatus(newStatus) {
-            appState.kedaiStatus = newStatus;
-            saveState();
-            renderHeaderStatus();
-            renderMenuGrid();
-            renderCartBar();
-            showToast(`Status kedai diubah: ${newStatus}`, 'success');
+        // Admin Actions
+        function updateKedaiStatus(val) {
+            storeStatus = val;
+            localStorage.setItem('kedai_dean_status', val);
+            renderStatusBadge();
+            renderStatusBanner();
+            renderMenuItems();
         }
 
         function saveAwayNote() {
-            const note = document.getElementById('adminAwayNoteInput').value;
-            appState.awayNote = note;
-            saveState();
-            renderHeaderStatus();
-            showToast('Keterangan pergi disimpan', 'success');
+            awayNote = document.getElementById('adminAwayNoteInput').value;
+            localStorage.setItem('kedai_dean_away_note', awayNote);
+            renderStatusBanner();
+            alert('Keterangan waktu istirahat berhasil disimpan!');
         }
 
         function saveWaNumber() {
-            const wa = document.getElementById('adminWaInput').value;
-            appState.waNumber = wa;
-            saveState();
-            renderHeaderStatus();
-            showToast('Nomor WhatsApp Kedai disimpan', 'success');
-        }
-
-        function toggleShowUnavailable(val) {
-            appState.showUnavailableToPublic = val;
-            saveState();
-            renderMenuGrid();
-        }
-
-        function toggleStock(menuId) {
-            const menu = appState.menus.find(m => m.id === menuId);
-            if (menu) {
-                menu.isReady = !menu.isReady;
-                if (!menu.isReady && appState.cart[menuId]) {
-                    delete appState.cart[menuId];
-                }
-                saveState();
-                renderMenuGrid();
-                renderCartBar();
-                showToast(`Menu "${menu.name}" sekarang ${menu.isReady ? 'READY' : 'HABIS'}`, menu.isReady ? 'success' : 'warning');
+            const input = document.getElementById('adminWaInput').value.trim();
+            if (input) {
+                waNumber = input;
+                localStorage.setItem('kedai_dean_wa', input);
+                document.getElementById('footerWaText').innerText = '+' + input;
+                alert('Nomor WhatsApp Kedai berhasil diperbarui!');
             }
         }
 
-        // Add/Edit Menu Modals
+        function saveNewAdminPin() {
+            const newPin = document.getElementById('adminChangePinInput').value.trim();
+            if (newPin.length >= 4) {
+                adminPin = newPin;
+                localStorage.setItem('kedai_dean_pin', newPin);
+                document.getElementById('adminChangePinInput').value = '';
+                alert('PIN Admin berhasil diganti!');
+            } else {
+                alert('PIN minimal 4 digit!');
+            }
+        }
+
+        function toggleShowUnavailable(checked) {
+            showUnavailable = checked;
+            localStorage.setItem('kedai_dean_show_unavailable', checked);
+            renderMenuItems();
+        }
+
+        function toggleMenuStatus(id) {
+            const item = menuItems.find(m => m.id === id);
+            if (item) {
+                item.isReady = !item.isReady;
+                saveMenuState();
+                renderMenuItems();
+            }
+        }
+
+        function deleteMenu(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus menu ini?')) {
+                menuItems = menuItems.filter(m => m.id !== id);
+                delete cart[id];
+                saveMenuState();
+                renderMenuItems();
+                updateCartBar();
+            }
+        }
+
+        function saveMenuState() {
+            localStorage.setItem('kedai_dean_menu', JSON.stringify(menuItems));
+        }
+
+        // Add / Edit Modal Actions
         function openAddMenuModal() {
             document.getElementById('menuModalTitle').innerText = 'Tambah Menu Baru';
+            document.getElementById('menuForm').reset();
             document.getElementById('menuFormId').value = '';
-            document.getElementById('menuFormName').value = '';
-            document.getElementById('menuFormCategory').value = 'Makanan';
-            document.getElementById('menuFormPrice').value = '';
-            document.getElementById('menuFormDesc').value = '';
-            document.getElementById('menuFormEmoji').value = '🍱';
-            document.getElementById('menuFormImageUrl').value = '';
             document.getElementById('menuFormIsReady').checked = true;
             document.getElementById('menuModal').classList.remove('hidden');
         }
 
-        function openEditMenuModal(menuId) {
-            const item = appState.menus.find(m => m.id === menuId);
+        function openEditMenuModal(id) {
+            const item = menuItems.find(m => m.id === id);
             if (!item) return;
 
             document.getElementById('menuModalTitle').innerText = 'Edit Menu';
@@ -1090,10 +890,11 @@
             document.getElementById('menuFormName').value = item.name;
             document.getElementById('menuFormCategory').value = item.category;
             document.getElementById('menuFormPrice').value = item.price;
-            document.getElementById('menuFormDesc').value = item.description || '';
-            document.getElementById('menuFormEmoji').value = item.emoji || '🍽️';
+            document.getElementById('menuFormDesc').value = item.desc || '';
+            document.getElementById('menuFormEmoji').value = item.emoji || '';
             document.getElementById('menuFormImageUrl').value = item.imageUrl || '';
             document.getElementById('menuFormIsReady').checked = item.isReady;
+
             document.getElementById('menuModal').classList.remove('hidden');
         }
 
@@ -1106,106 +907,68 @@
             const id = document.getElementById('menuFormId').value;
             const name = document.getElementById('menuFormName').value;
             const category = document.getElementById('menuFormCategory').value;
-            const price = parseInt(document.getElementById('menuFormPrice').value) || 0;
-            const description = document.getElementById('menuFormDesc').value;
-            const emoji = document.getElementById('menuFormEmoji').value || '🍱';
-            const imageUrl = document.getElementById('menuFormImageUrl').value.trim();
+            const price = parseInt(document.getElementById('menuFormPrice').value);
+            const desc = document.getElementById('menuFormDesc').value;
+            const emoji = document.getElementById('menuFormEmoji').value;
+            const imageUrl = document.getElementById('menuFormImageUrl').value;
             const isReady = document.getElementById('menuFormIsReady').checked;
 
             if (id) {
-                const index = appState.menus.findIndex(m => m.id === id);
-                if (index !== -1) {
-                    appState.menus[index] = { id, name, category, price, description, emoji, imageUrl, isReady };
-                    showToast('Menu berhasil diperbarui', 'success');
+                // Update
+                const item = menuItems.find(m => m.id === id);
+                if (item) {
+                    item.name = name;
+                    item.category = category;
+                    item.price = price;
+                    item.desc = desc;
+                    item.emoji = emoji;
+                    item.imageUrl = imageUrl;
+                    item.isReady = isReady;
                 }
             } else {
-                const newId = 'm_' + Date.now();
-                appState.menus.push({ id: newId, name, category, price, description, emoji, imageUrl, isReady });
-                showToast('Menu baru berhasil ditambahkan', 'success');
+                // Create New
+                const newItem = {
+                    id: Date.now().toString(),
+                    name,
+                    category,
+                    price,
+                    desc,
+                    emoji,
+                    imageUrl,
+                    isReady
+                };
+                menuItems.push(newItem);
             }
 
-            saveState();
+            saveMenuState();
             closeMenuModal();
-            renderMenuGrid();
+            renderMenuItems();
         }
 
-        // Custom Delete Modal Handler
-        let menuToDeleteId = null;
-        function promptDeleteMenu(menuId) {
-            const item = appState.menus.find(m => m.id === menuId);
-            if (!item) return;
-
-            menuToDeleteId = menuId;
-            document.getElementById('deleteConfirmText').innerText = `Apakah Anda yakin ingin menghapus menu "${item.name}"?`;
-            document.getElementById('deleteConfirmModal').classList.remove('hidden');
-
-            document.getElementById('confirmDeleteBtn').onclick = function() {
-                if (menuToDeleteId) {
-                    appState.menus = appState.menus.filter(m => m.id !== menuToDeleteId);
-                    if (appState.cart[menuToDeleteId]) delete appState.cart[menuToDeleteId];
-                    saveState();
-                    renderMenuGrid();
-                    renderCartBar();
-                    closeDeleteModal();
-                    showToast('Menu telah dihapus', 'info');
-                }
-            };
-        }
-
-        function closeDeleteModal() {
-            menuToDeleteId = null;
-            document.getElementById('deleteConfirmModal').classList.add('hidden');
-        }
-
-        // Checkout Modal & WhatsApp Payload
-        function renderCheckoutItems() {
-            const itemsContainer = document.getElementById('checkoutItemsList');
-            const totalText = document.getElementById('checkoutTotalText');
-
-            let total = 0;
-            let itemsHTML = '';
-
-            Object.keys(appState.cart).forEach(id => {
-                const item = appState.menus.find(m => m.id === id);
-                if (item) {
-                    const qty = appState.cart[id];
-                    const subtotal = item.price * qty;
-                    total += subtotal;
-
-                    itemsHTML += `
-                        <div class="flex items-center justify-between text-slate-700 bg-white p-2 rounded-xl border border-slate-200/60 shadow-xs">
-                            <div class="flex-1 pr-2">
-                                <div class="font-bold text-slate-900 leading-tight">${item.name}</div>
-                                <div class="text-[11px] text-brand-600 font-semibold">${formatRupiah(subtotal)}</div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="updateCart('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs transition active:scale-95" title="Kurangi porsi">
-                                    -
-                                </button>
-                                <span class="font-extrabold text-xs text-slate-800 w-5 text-center">${qty}</span>
-                                <button type="button" onclick="updateCart('${item.id}', 1)" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs transition active:scale-95" title="Tambah porsi">
-                                    +
-                                </button>
-                                <button type="button" onclick="removeFromCart('${item.id}')" class="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs transition ml-1" title="Hapus dari keranjang">
-                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
-            itemsContainer.innerHTML = itemsHTML;
-            totalText.innerText = formatRupiah(total);
-        }
-
+        // Checkout & WhatsApp Integration
         function openCheckoutModal() {
-            if (Object.keys(appState.cart).length === 0) {
-                showToast('Keranjang pesanan masih kosong.', 'warning');
-                return;
-            }
+            const container = document.getElementById('checkoutItemsList');
+            let totalPrice = 0;
 
-            renderCheckoutItems();
+            const itemsHtml = Object.keys(cart).map(id => {
+                const item = menuItems.find(m => m.id === id);
+                if (!item) return '';
+                const subtotal = item.price * cart[id];
+                totalPrice += subtotal;
+
+                return `
+                    <div class="flex items-center justify-between py-1 border-b border-slate-100 last:border-none">
+                        <div>
+                            <span class="font-semibold text-slate-800">${item.name}</span>
+                            <span class="text-slate-400 block text-[10px]">@ Rp ${item.price.toLocaleString('id-ID')} x ${cart[id]}</span>
+                        </div>
+                        <span class="font-bold text-slate-900">Rp ${subtotal.toLocaleString('id-ID')}</span>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = itemsHtml;
+            document.getElementById('checkoutTotalText').innerText = `Rp ${totalPrice.toLocaleString('id-ID')}`;
             document.getElementById('checkoutModal').classList.remove('hidden');
         }
 
@@ -1215,73 +978,34 @@
 
         function handleSendWhatsApp(e) {
             e.preventDefault();
-
             const name = document.getElementById('custName').value.trim();
             const orderType = document.querySelector('input[name="orderType"]:checked').value;
             const notes = document.getElementById('custNotes').value.trim();
 
-            if (!name) {
-                showToast('Harap masukkan nama Anda', 'warning');
-                return;
-            }
-
-            let orderText = `*PESANAN BARU - KEDAI DEAN* 🍽️\n\n`;
-            orderText += `👤 *Nama Pemesan:* ${name}\n`;
-            orderText += `📦 *Tipe Pesanan:* ${orderType}\n`;
-            orderText += `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}\n\n`;
-            orderText += `*DAFTAR PESANAN:* \n`;
+            let text = `*HALO KEDAI DEAN, SAYA MAU PESAN!* 🍲\n\n`;
+            text += `*Detail Pemesan:*\n`;
+            text += `• Nama: ${name}\n`;
+            text += `• Tipe Order: ${orderType}\n`;
+            if (notes) text += `• Catatan/Alamat: ${notes}\n`;
+            text += `\n*Daftar Pesanan:*\n`;
 
             let totalPrice = 0;
-            Object.keys(appState.cart).forEach(id => {
-                const item = appState.menus.find(m => m.id === id);
+            Object.keys(cart).forEach(id => {
+                const item = menuItems.find(m => m.id === id);
                 if (item) {
-                    const qty = appState.cart[id];
-                    const subtotal = item.price * qty;
+                    const subtotal = item.price * cart[id];
                     totalPrice += subtotal;
-                    orderText += `• ${item.name} (${qty}x) = ${formatRupiah(subtotal)}\n`;
+                    text += `- ${item.name} (${cart[id]}x) = Rp ${subtotal.toLocaleString('id-ID')}\n`;
                 }
             });
 
-            orderText += `\n💵 *TOTAL TAGIHAN:* ${formatRupiah(totalPrice)}\n`;
-            if (notes) {
-                orderText += `📝 *Catatan:* ${notes}\n`;
-            }
+            text += `\n*Total Tagihan:* Rp ${totalPrice.toLocaleString('id-ID')}\n`;
+            text += `\nMohon diproses ya, terima kasih!`;
 
-            orderText += `\nMohon segera diproses ya Kedai Dean. Terima kasih! 🙏`;
-
-            let cleanPhone = (appState.waNumber || '6289519824952').replace(/\D/g, '');
-            if (cleanPhone.startsWith('0')) {
-                cleanPhone = '62' + cleanPhone.substring(1);
-            }
-
-            const encodedMsg = encodeURIComponent(orderText);
-            const waUrl = `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
-
-            // Reset Otomatis Keranjang & Form Selesai Order
-            appState.cart = {};
-            saveState();
-            renderMenuGrid();
-            renderCartBar();
-            closeCheckoutModal();
-
-            // Reset form input
-            document.getElementById('custName').value = '';
-            document.getElementById('custNotes').value = '';
-
-            showToast('Membuka WhatsApp Kedai Dean...', 'success');
+            const encodedText = encodeURIComponent(text);
+            const waUrl = `https://wa.me/${waNumber}?text=${encodedText}`;
             window.open(waUrl, '_blank');
         }
-
-        // Initialize App on Window Load
-        window.onload = function() {
-            document.getElementById('currentYear').innerText = new Date().getFullYear();
-            renderHeaderStatus();
-            renderCategories();
-            renderMenuGrid();
-            renderCartBar();
-        };
     </script>
 </body>
 </html>
-
-```
