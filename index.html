@@ -1,3 +1,10 @@
+Berikut adalah kode lengkap `index.html` yang sudah diperbarui dengan fitur-fitur tersebut:
+
+1. **Tombol Hapus (🗑️) & Kurangi (➖) di Modal Checkout:** Setiap item di modal konfirmasi kini memiliki kontrol `+`, `-`, dan tombol hapus cepat (🗑️). Jika porsi dikurangi hingga 0, item otomatis terhapus dari keranjang.
+2. **Tombol "Kosongkan Keranjang":** Disediakan tombol cepat di bagian atas ringkasan modal checkout untuk menghapus seluruh isi keranjang sekaligus.
+3. **Reset Otomatis Selesai Order:** Fungsi `handleSendWhatsApp` memastikan keranjang langsung dikosongkan dan tampilan diperbarui begitu pesan WhatsApp terbuat.
+
+```html
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
@@ -455,8 +462,13 @@
 
             <!-- Selected Menu Summary Card -->
             <div class="bg-slate-50 rounded-2xl p-3.5 mb-4 border border-slate-200/80 space-y-2">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ringkasan Item</span>
-                <div id="checkoutItemsList" class="space-y-1.5 text-xs max-h-36 overflow-y-auto custom-scrollbar">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ringkasan Item</span>
+                    <button onclick="clearCart()" class="text-[11px] font-semibold text-rose-500 hover:text-rose-700 flex items-center gap-1 transition">
+                        <i class="fa-solid fa-trash-can text-[10px]"></i> Kosongkan Keranjang
+                    </button>
+                </div>
+                <div id="checkoutItemsList" class="space-y-2 text-xs max-h-48 overflow-y-auto custom-scrollbar pr-1">
                     <!-- Dynamic cart items list -->
                 </div>
                 <div class="border-t border-slate-200 pt-2 flex justify-between font-bold text-xs sm:text-sm text-slate-900">
@@ -903,6 +915,38 @@
             saveState();
             renderMenuGrid();
             renderCartBar();
+
+            // Refresh modal list if modal is open
+            if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
+                if (Object.keys(appState.cart).length === 0) {
+                    closeCheckoutModal();
+                } else {
+                    renderCheckoutItems();
+                }
+            }
+        }
+
+        function removeFromCart(menuId) {
+            delete appState.cart[menuId];
+            saveState();
+            renderMenuGrid();
+            renderCartBar();
+
+            if (Object.keys(appState.cart).length === 0) {
+                closeCheckoutModal();
+                showToast('Keranjang belanja dikosongkan', 'info');
+            } else {
+                renderCheckoutItems();
+            }
+        }
+
+        function clearCart() {
+            appState.cart = {};
+            saveState();
+            renderMenuGrid();
+            renderCartBar();
+            closeCheckoutModal();
+            showToast('Keranjang berhasil dikosongkan', 'info');
         }
 
         function renderCartBar() {
@@ -1121,12 +1165,7 @@
         }
 
         // Checkout Modal & WhatsApp Payload
-        function openCheckoutModal() {
-            if (Object.keys(appState.cart).length === 0) {
-                showToast('Keranjang pesanan masih kosong.', 'warning');
-                return;
-            }
-
+        function renderCheckoutItems() {
             const itemsContainer = document.getElementById('checkoutItemsList');
             const totalText = document.getElementById('checkoutTotalText');
 
@@ -1141,11 +1180,23 @@
                     total += subtotal;
 
                     itemsHTML += `
-                        <div class="flex justify-between items-center text-slate-700">
-                            <div>
-                                <span class="font-bold text-slate-900">${qty}x</span> ${item.name}
+                        <div class="flex items-center justify-between text-slate-700 bg-white p-2 rounded-xl border border-slate-200/60 shadow-xs">
+                            <div class="flex-1 pr-2">
+                                <div class="font-bold text-slate-900 leading-tight">${item.name}</div>
+                                <div class="text-[11px] text-brand-600 font-semibold">${formatRupiah(subtotal)}</div>
                             </div>
-                            <span class="font-semibold text-slate-800">${formatRupiah(subtotal)}</span>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="updateCart('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs transition active:scale-95" title="Kurangi porsi">
+                                    -
+                                </button>
+                                <span class="font-extrabold text-xs text-slate-800 w-5 text-center">${qty}</span>
+                                <button type="button" onclick="updateCart('${item.id}', 1)" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs transition active:scale-95" title="Tambah porsi">
+                                    +
+                                </button>
+                                <button type="button" onclick="removeFromCart('${item.id}')" class="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs transition ml-1" title="Hapus dari keranjang">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                </button>
+                            </div>
                         </div>
                     `;
                 }
@@ -1153,6 +1204,15 @@
 
             itemsContainer.innerHTML = itemsHTML;
             totalText.innerText = formatRupiah(total);
+        }
+
+        function openCheckoutModal() {
+            if (Object.keys(appState.cart).length === 0) {
+                showToast('Keranjang pesanan masih kosong.', 'warning');
+                return;
+            }
+
+            renderCheckoutItems();
             document.getElementById('checkoutModal').classList.remove('hidden');
         }
 
@@ -1204,12 +1264,16 @@
             const encodedMsg = encodeURIComponent(orderText);
             const waUrl = `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
 
-            // Clear Cart & Close Modal
+            // Reset Otomatis Keranjang & Form Selesai Order
             appState.cart = {};
             saveState();
             renderMenuGrid();
             renderCartBar();
             closeCheckoutModal();
+
+            // Reset form input
+            document.getElementById('custName').value = '';
+            document.getElementById('custNotes').value = '';
 
             showToast('Membuka WhatsApp Kedai Dean...', 'success');
             window.open(waUrl, '_blank');
@@ -1226,3 +1290,5 @@
     </script>
 </body>
 </html>
+
+```
