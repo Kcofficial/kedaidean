@@ -39,7 +39,6 @@
         }
     </script>
     <style>
-        /* Custom scrollbar for mobile sliding components */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -62,7 +61,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        /* Mobile tap highlight reset */
         button, a, input {
             -webkit-tap-highlight-color: transparent;
         }
@@ -79,7 +77,7 @@
     <!-- Main Navigation Header -->
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-slate-200/80 shadow-sm transition-all duration-300">
         <div class="max-w-5xl mx-auto px-4 py-2.5 sm:py-3 flex items-center justify-between gap-3">
-            <!-- Brand Logo & Name (Tapping Logo 5 times unlocks Admin PIN Modal) -->
+            <!-- Brand Logo (Ketuk 5x cepat untuk modal PIN Admin) -->
             <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="handleLogoClick()">
                 <div class="relative">
                     <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-brand-500/30 transform hover:scale-105 transition">
@@ -100,30 +98,24 @@
                 </div>
             </div>
 
-            <!-- Right Controls: Status Badge -->
+            <!-- Status Badge Header -->
             <div class="flex items-center space-x-2">
-                <div id="statusBadgeContainer">
-                    <!-- Status Badge dynamic render -->
-                </div>
+                <div id="statusBadgeContainer"></div>
             </div>
         </div>
     </header>
 
-    <!-- Store Operational Status Alert Banner -->
+    <!-- Operational Status Alert Banner -->
     <div id="statusBanner" class="hidden"></div>
 
-    <!-- Main Content Container -->
+    <!-- Main Content -->
     <main class="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex-1 w-full space-y-6">
 
-        <!-- Mobile-friendly Hero Banner -->
+        <!-- Banner Hero & Search Bar -->
         <div class="relative rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-amber-600 text-white p-5 sm:p-8 shadow-xl overflow-hidden">
             <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl pointer-events-none">
                 <i class="fa-solid fa-utensils"></i>
             </div>
-            <div class="absolute right-1/4 -top-8 opacity-10 text-7xl pointer-events-none">
-                <i class="fa-solid fa-burger"></i>
-            </div>
-
             <div class="relative z-10 max-w-xl">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md text-amber-100 mb-2 border border-white/20">
                     <i class="fa-solid fa-fire text-amber-300"></i> Menu Favorit Kedai Dean
@@ -147,14 +139,12 @@
             </div>
         </div>
 
-        <!-- Sticky Category Slider bar -->
+        <!-- Sticky Navigasi Kategori Filter -->
         <div class="sticky top-[61px] sm:top-[69px] z-30 bg-slate-50/95 backdrop-blur-md py-2 -mx-4 px-4 border-b border-slate-200/50">
-            <div id="categoryContainer" class="flex gap-2 overflow-x-auto no-scrollbar py-1">
-                <!-- Dynamic Category Buttons -->
-            </div>
+            <div id="categoryContainer" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
         </div>
 
-        <!-- Admin Dynamic Management Panel -->
+        <!-- Panel Admin / Pengelola Kedai (Hidden by default) -->
         <div id="adminPanel" class="hidden bg-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800 animate-fadeIn">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-4">
                 <div class="flex items-center gap-3">
@@ -176,7 +166,7 @@
                 </div>
             </div>
 
-            <!-- Status Controls -->
+            <!-- Status Operasional & Catatan Istirahat -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                 <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Status Operasional Kedai</label>
@@ -188,7 +178,7 @@
                 </div>
 
                 <div id="awayNoteWrapper" class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80 md:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Keterangan Tambahan Saat Pergi / Istirahat</label>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Pesan Khusus Saat Istirahat / Pergi</label>
                     <div class="flex gap-2">
                         <input type="text" id="adminAwayNoteInput" placeholder="Contoh: Sedang keluar sebentar, kembali jam 16.30 WIB" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <button onclick="saveAwayNote()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs font-semibold transition">Simpan</button>
@@ -196,7 +186,7 @@
                 </div>
             </div>
 
-            <!-- WhatsApp & Display Options -->
+            <!-- Pengaturan WhatsApp, PIN Admin & Stok -->
             <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs text-slate-400 border-t border-slate-800">
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
@@ -213,13 +203,13 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="adminShowUnavailableCheck" onchange="toggleShowUnavailable(this.checked)" class="rounded text-brand-600 focus:ring-brand-500 bg-slate-900 border-slate-700 w-4 h-4 cursor-pointer">
-                        <label for="adminShowUnavailableCheck" class="cursor-pointer text-slate-300 text-xs">Tampilkan menu habis (Habis)</label>
+                        <label for="adminShowUnavailableCheck" class="cursor-pointer text-slate-300 text-xs">Tampilkan menu habis</label>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Menu Section Header -->
+        <!-- Section Title Bar -->
         <div class="flex items-center justify-between pt-2">
             <div>
                 <h3 id="menuSectionTitle" class="text-lg sm:text-xl font-bold text-slate-900 leading-none">Daftar Menu Ready</h3>
@@ -228,12 +218,10 @@
             <span id="menuCountBadge" class="text-xs bg-brand-100 text-brand-800 font-bold px-3 py-1 rounded-full border border-brand-200">0 Menu</span>
         </div>
 
-        <!-- Menu Grid Layout -->
-        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Menu items dynamic injection -->
-        </div>
+        <!-- Grid Menu -->
+        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-        <!-- Empty State -->
+        <!-- Empty State Menu -->
         <div id="emptyMenuState" class="hidden text-center py-12 bg-white rounded-3xl border border-dashed border-slate-300 p-6">
             <div class="w-16 h-16 bg-brand-50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
                 <i class="fa-solid fa-utensils"></i>
@@ -243,7 +231,7 @@
         </div>
     </main>
 
-    <!-- Sticky Bottom Mobile & Desktop Cart Floating Bar -->
+    <!-- Floating Cart Bar (Sticky Bottom) -->
     <div id="cartBar" class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3.5 sm:p-4 shadow-mobile-cart z-40 transform translate-y-full transition-transform duration-300 ease-out">
         <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
             <div class="flex items-center space-x-3">
@@ -264,36 +252,20 @@
         </div>
     </div>
 
-    <!-- Professional Footer Section -->
+    <!-- Footer -->
     <footer class="bg-slate-900 text-slate-300 mt-12 border-t border-slate-800">
         <div class="max-w-5xl mx-auto px-4 py-10 sm:py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                
-                <!-- Col 1: About Kedai -->
                 <div class="space-y-3 md:col-span-1">
                     <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
-                            KD
-                        </div>
+                        <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm">KD</div>
                         <span class="font-bold text-lg text-white">Kedai Dean</span>
                     </div>
                     <p class="text-xs text-slate-400 leading-relaxed">
                         Menyajikan aneka hidangan lezat, minuman segar, dan camilan nikmat khas Kedai Dean dengan harga bersahabat.
                     </p>
-                    <div class="flex space-x-3 pt-1">
-                        <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white flex items-center justify-center text-xs transition" title="Instagram">
-                            <i class="fa-brands fa-instagram"></i>
-                        </a>
-                        <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white flex items-center justify-center text-xs transition" title="TikTok">
-                            <i class="fa-brands fa-tiktok"></i>
-                        </a>
-                        <a href="https://wa.me/6289519824952" target="_blank" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white flex items-center justify-center text-xs transition" title="WhatsApp">
-                            <i class="fa-brands fa-whatsapp"></i>
-                        </a>
-                    </div>
                 </div>
 
-                <!-- Col 2: Jam Operasional -->
                 <div class="space-y-2">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-100">Jam Operasional</h4>
                     <ul class="text-xs text-slate-400 space-y-1.5">
@@ -301,19 +273,15 @@
                             <span>Setiap Hari:</span>
                             <span class="font-medium text-slate-200">07:00 - 22:00 WIB</span>
                         </li>
-                        <li class="pt-1 text-[11px] text-amber-400 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-info"></i> Update stok real-time setiap hari
-                        </li>
                     </ul>
                 </div>
 
-                <!-- Col 3: Alamat & Kontak -->
                 <div class="space-y-2">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-100">Alamat & Kontak</h4>
                     <ul class="text-xs text-slate-400 space-y-2">
                         <li class="flex items-start gap-2">
                             <i class="fa-solid fa-location-dot text-rose-500 mt-0.5"></i>
-                            <a href="https://www.google.com/maps/place/Gg.+Ceria+No.12+Perumahan+Dadi+99+Tahap+4,+Margodadi,+Jati+Agung,+Lampung+Selatan/@-5.3213661,105.3690884,17z/data=!3m1!4b1!4m6!3m5!1s0x2e40c3c3f44088b1:0xbcaa48cceab69882!8m2!3d-5.3213661!4d105.3716633!16s%2Fg%2F11tt5pldqs?entry=ttu&g_ep=EgoyMDI2MDkwOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" class="hover:underline hover:text-white leading-tight">
+                            <a href="https://www.google.com/maps/place/Gg.+Ceria+No.12+Perumahan+Dadi+99+Tahap+4,+Margodadi,+Jati+Agung,+Lampung+Selatan" target="_blank" class="hover:underline hover:text-white leading-tight">
                                 Gg. Ceria No.12 Perumahan Dadi 99 Tahap 4, Margodadi, Jati Agung, Lampung Selatan
                             </a>
                         </li>
@@ -324,43 +292,32 @@
                     </ul>
                 </div>
 
-                <!-- Col 4: Layanan Pemesanan -->
                 <div class="space-y-2">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-100">Layanan Order</h4>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        Pesan langsung lewat web, pilih menu yang ready, dan sistem akan langsung memformat pesan ke WhatsApp Kedai Dean.
+                        Pesan langsung lewat web, sistem otomatis memformat rincian pesanan langsung ke WhatsApp Kedai Dean.
                     </p>
-                    <div class="pt-1">
-                        <span class="inline-block bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-medium px-2.5 py-1 rounded-lg">
-                            🛵 Diantar / 🛍️ Diambil
-                        </span>
-                    </div>
                 </div>
-
             </div>
 
-            <!-- Copyright Divider -->
             <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
                 <p>&copy; <span id="currentYear">2026</span> Kedai Dean. All rights reserved.</p>
-                <div class="flex items-center gap-3">
-                    <p class="text-[11px]">Sistem Informasi & Pemesanan Menu Online</p>
-                    <button onclick="toggleAdminView()" title="Akses Pengelola" class="opacity-20 hover:opacity-80 transition text-slate-400 hover:text-amber-400 text-[10px] flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-800">
-                        <i class="fa-solid fa-lock text-[9px]"></i> Admin
-                    </button>
-                </div>
+                <button onclick="toggleAdminView()" title="Akses Admin" class="opacity-30 hover:opacity-100 transition text-slate-400 hover:text-amber-400 text-[10px] flex items-center gap-1 px-2 py-1 rounded border border-slate-800">
+                    <i class="fa-solid fa-lock text-[9px]"></i> Admin Kedai
+                </button>
             </div>
         </div>
     </footer>
 
-    <!-- Admin Authentication Modal -->
+    <!-- Modal Masukkan PIN Admin -->
     <div id="adminPinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl transform transition-all border border-slate-100">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
             <div class="text-center mb-5">
                 <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-2 text-slate-800 text-xl shadow-inner">
                     <i class="fa-solid fa-shield-halved text-brand-600"></i>
                 </div>
                 <h3 class="text-lg font-bold text-slate-900">Akses Pengelola Kedai</h3>
-                <p class="text-xs text-slate-500 mt-1">Masukkan PIN keamanan untuk mengelola status kedai & menu. (Default: <span class="font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">1234</span>)</p>
+                <p class="text-xs text-slate-500 mt-1">Masukkan PIN keamanan untuk mengelola kedai. (PIN Default: <span class="font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">1234</span>)</p>
             </div>
 
             <div class="mb-5">
@@ -375,7 +332,7 @@
         </div>
     </div>
 
-    <!-- Add/Edit Menu Item Modal -->
+    <!-- Modal Tambah / Edit Menu (CRUD + Base64 Upload & URL) -->
     <div id="menuModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
@@ -400,7 +357,7 @@
                             <option value="Makanan">Makanan</option>
                             <option value="Minuman">Minuman</option>
                             <option value="Camilan">Camilan</option>
-                            <option value="Paket">Paket Hemat</option>
+                            <option value="Paket">Paket</option>
                         </select>
                     </div>
                     <div>
@@ -411,20 +368,17 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Deskripsi Singkat</label>
-                    <textarea id="menuFormDesc" rows="2" placeholder="Komposisi rasa, misal: Sambal pedas gurih + Nasi hangat" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    <textarea id="menuFormDesc" rows="2" placeholder="Detail rasa atau kelengkapan porsi..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Emoji / Ikon Menu</label>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Emoji Menu</label>
                     <input type="text" id="menuFormEmoji" placeholder="🍗, 🧋, 🍟, 🍱" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
 
-                <!-- Fitur Upload Foto Produk / URL Link -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Foto Menu (Upload File / Link URL)</label>
-                    
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Foto Menu (Upload Base64 / URL)</label>
                     <div class="space-y-2">
-                        <!-- Input Upload File Foto -->
                         <div class="flex items-center gap-2">
                             <label class="flex-1 cursor-pointer bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl px-3 py-2 text-xs font-semibold flex items-center justify-center gap-2 transition">
                                 <i class="fa-solid fa-cloud-arrow-up text-brand-600"></i>
@@ -436,13 +390,11 @@
                             </button>
                         </div>
 
-                        <!-- Preview Foto -->
                         <div id="imagePreviewContainer" class="hidden relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200">
                             <img id="imagePreview" src="" alt="Preview" class="w-full h-full object-cover">
                         </div>
 
-                        <!-- Alternatif URL Link -->
-                        <input type="url" id="menuFormImageUrl" placeholder="Atau tempel URL gambar (https://...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <input type="url" id="menuFormImageUrl" placeholder="Atau tempel Link URL gambar (https://...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -459,7 +411,7 @@
         </div>
     </div>
 
-    <!-- Customer Checkout Modal -->
+    <!-- Modal Checkout Pelanggan & Format WhatsApp -->
     <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
@@ -472,7 +424,7 @@
                 </button>
             </div>
 
-            <!-- Selected Menu Summary Card -->
+            <!-- Rekap Item Pesanan -->
             <div class="bg-slate-50 rounded-2xl p-3.5 mb-4 border border-slate-200/80 space-y-2">
                 <div class="flex justify-between items-center">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ringkasan Item</span>
@@ -480,9 +432,7 @@
                         <i class="fa-solid fa-trash-can text-[10px]"></i> Kosongkan Keranjang
                     </button>
                 </div>
-                <div id="checkoutItemsList" class="space-y-2 text-xs max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                    <!-- Dynamic cart items list -->
-                </div>
+                <div id="checkoutItemsList" class="space-y-2 text-xs max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
                 <div class="border-t border-slate-200 pt-2 flex justify-between font-bold text-xs sm:text-sm text-slate-900">
                     <span>Total Tagihan:</span>
                     <span id="checkoutTotalText" class="text-brand-600 font-extrabold">Rp 0</span>
@@ -496,22 +446,37 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tipe Pesanan</label>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Metode Layanan & Bayar</label>
+                    <div class="grid grid-cols-3 gap-1.5 mb-2">
+                        <label class="border border-slate-200 rounded-xl p-2 text-center cursor-pointer hover:bg-slate-50 [&:has(input:checked)]:border-brand-500 [&:has(input:checked)]:bg-brand-50/50 transition">
+                            <input type="radio" name="orderType" value="Delivery (Diantar)" checked class="hidden">
+                            <span class="text-[11px] font-semibold text-slate-700 block">🛵 Delivery</span>
+                        </label>
+                        <label class="border border-slate-200 rounded-xl p-2 text-center cursor-pointer hover:bg-slate-50 [&:has(input:checked)]:border-brand-500 [&:has(input:checked)]:bg-brand-50/50 transition">
+                            <input type="radio" name="orderType" value="Takeaway (Ambil)" class="hidden">
+                            <span class="text-[11px] font-semibold text-slate-700 block">🛍️ Takeaway</span>
+                        </label>
+                        <label class="border border-slate-200 rounded-xl p-2 text-center cursor-pointer hover:bg-slate-50 [&:has(input:checked)]:border-brand-500 [&:has(input:checked)]:bg-brand-50/50 transition">
+                            <input type="radio" name="orderType" value="Dine-in (Makan di Tempat)" class="hidden">
+                            <span class="text-[11px] font-semibold text-slate-700 block">🍽️ Dine-in</span>
+                        </label>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         <label class="border border-slate-200 rounded-xl p-2 flex items-center gap-2 cursor-pointer hover:bg-slate-50 [&:has(input:checked)]:border-brand-500 [&:has(input:checked)]:bg-brand-50/50 transition">
-                            <input type="radio" name="orderType" value="Diantar (Delivery)" checked class="text-brand-600 focus:ring-brand-500">
-                            <span class="text-xs font-semibold text-slate-700">🛵 Diantar</span>
+                            <input type="radio" name="paymentType" value="Tunai / COD" checked class="text-brand-600">
+                            <span class="text-xs font-semibold text-slate-700">💵 Tunai / COD</span>
                         </label>
                         <label class="border border-slate-200 rounded-xl p-2 flex items-center gap-2 cursor-pointer hover:bg-slate-50 [&:has(input:checked)]:border-brand-500 [&:has(input:checked)]:bg-brand-50/50 transition">
-                            <input type="radio" name="orderType" value="Takeaway / Ambil Sendiri" class="text-brand-600 focus:ring-brand-500">
-                            <span class="text-xs font-semibold text-slate-700">🛍️ Diambil</span>
+                            <input type="radio" name="paymentType" value="Transfer / QRIS" class="text-brand-600">
+                            <span class="text-xs font-semibold text-slate-700">💳 Transfer / QRIS</span>
                         </label>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Alamat Pengiriman / Catatan</label>
-                    <textarea id="custNotes" rows="2" placeholder="Alamat lengkap / Detail patokan rumah..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Alamat / No. Meja / Catatan</label>
+                    <textarea id="custNotes" rows="2" placeholder="Alamat pengiriman, nomor meja jika Dine-in, atau catatan pedas..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
                 </div>
 
                 <div class="flex gap-2 pt-2">
@@ -524,9 +489,8 @@
         </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Script Logika Aplikasi & Persistensi LocalStorage -->
     <script>
-        // Initial Default Data
         const DEFAULT_MENUS = [
             { id: 1, name: "Nasi Goreng Special Dean", category: "Makanan", price: 18000, desc: "Nasi goreng bumbu spesial, telur, ayam suwir, kerupuk, & acar.", emoji: "🍳", image: "", isReady: true },
             { id: 2, name: "Mie Goreng Dok Dok", category: "Makanan", price: 16000, desc: "Mie goreng gurih pedas khas kedai dengan racikan rempah pilihan.", emoji: "🍜", image: "", isReady: true },
@@ -536,7 +500,6 @@
             { id: 6, name: "Cireng Bumbu Rujak", category: "Camilan", price: 10000, desc: "Cireng renyah di luar lembut di dalam dengan cocolan bumbu rujak.", emoji: "🍟", image: "", isReady: true }
         ];
 
-        // State Management
         let menus = JSON.parse(localStorage.getItem('kd_menus')) || DEFAULT_MENUS;
         let cart = JSON.parse(localStorage.getItem('kd_cart')) || {};
         let storeStatus = localStorage.getItem('kd_status') || 'OPEN';
@@ -552,12 +515,10 @@
         let logoClickTimer = null;
         let uploadedBase64Image = "";
 
-        // Format Currency Helper
         function formatRupiah(num) {
             return 'Rp ' + Number(num).toLocaleString('id-ID');
         }
 
-        // Initialize App
         document.addEventListener('DOMContentLoaded', () => {
             renderCategories();
             renderStatusBanner();
@@ -571,7 +532,6 @@
             document.getElementById('footerWaText').innerText = '+' + waNumber;
         });
 
-        // Category Rendering
         const categories = ['Semua', 'Makanan', 'Minuman', 'Camilan', 'Paket'];
         function renderCategories() {
             const container = document.getElementById('categoryContainer');
@@ -596,7 +556,6 @@
             renderMenuGrid();
         }
 
-        // Search Handling
         function handleSearch() {
             const val = document.getElementById('searchInput').value.trim();
             searchQuery = val;
@@ -616,7 +575,6 @@
             renderMenuGrid();
         }
 
-        // Operational Status Banner
         function renderStatusBanner() {
             const banner = document.getElementById('statusBanner');
             const badgeContainer = document.getElementById('statusBadgeContainer');
@@ -632,7 +590,7 @@
                 bannerHtml = `
                     <div class="bg-amber-500 text-slate-900 px-4 py-2 text-xs font-semibold text-center flex items-center justify-center gap-2 shadow-inner">
                         <i class="fa-solid fa-clock"></i>
-                        <span>Kedai sedang istirahat / pergi: "${awayNote}". Anda tetap bisa menyiapkan pesanan.</span>
+                        <span>Kedai sedang istirahat: "${awayNote}". Anda tetap dapat menyiapkan pilihan menu.</span>
                     </div>
                 `;
                 banner.classList.remove('hidden');
@@ -651,7 +609,6 @@
             banner.innerHTML = bannerHtml;
         }
 
-        // Render Menu Items Grid
         function renderMenuGrid() {
             const grid = document.getElementById('menuGrid');
             const emptyState = document.getElementById('emptyMenuState');
@@ -693,7 +650,6 @@
                         ` : ''}
 
                         <div>
-                            <!-- Menu Image or Emoji Icon -->
                             <div class="w-full h-36 rounded-2xl bg-slate-100 mb-3 overflow-hidden flex items-center justify-center relative">
                                 ${item.image ? `
                                     <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
@@ -703,7 +659,7 @@
                                 
                                 ${!isReady ? `
                                     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
-                                        <span class="bg-rose-500 text-white font-bold text-xs px-3 py-1 rounded-full shadow-lg">Habis / Tidak Ready</span>
+                                        <span class="bg-rose-500 text-white font-bold text-xs px-3 py-1 rounded-full shadow-lg">Stok Habis</span>
                                     </div>
                                 ` : ''}
                             </div>
@@ -721,7 +677,6 @@
                                 <span class="text-sm sm:text-base font-extrabold text-brand-600">${formatRupiah(item.price)}</span>
                             </div>
 
-                            <!-- Cart Controls -->
                             <div>
                                 ${!isReady ? `
                                     <button disabled class="bg-slate-200 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-xs cursor-not-allowed">Habis</button>
@@ -747,7 +702,6 @@
             }).join('');
         }
 
-        // Cart Actions
         function updateQty(id, newQty) {
             if (newQty <= 0) {
                 delete cart[id];
@@ -757,13 +711,11 @@
             saveCart();
             renderMenuGrid();
             updateCartBar();
-            // Jika modal checkout sedang terbuka, perbarui tampilannya juga
             if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
                 renderCheckoutItems();
             }
         }
 
-        // FUNGSI REVISI: Hapus item spesifik dari keranjang
         function removeItemFromCart(id) {
             delete cart[id];
             saveCart();
@@ -811,7 +763,6 @@
             }
         }
 
-        // Checkout Modal & WhatsApp Handler
         function openCheckoutModal() {
             renderCheckoutItems();
             document.getElementById('checkoutModal').classList.remove('hidden');
@@ -845,8 +796,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="font-bold text-slate-900">${formatRupiah(subtotal)}</span>
-                                <!-- Tombol Hapus Per Item -->
-                                <button type="button" onclick="removeItemFromCart(${item.id})" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg text-xs transition" title="Hapus item ini">
+                                <button type="button" onclick="removeItemFromCart(${item.id})" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg text-xs transition" title="Hapus item">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>
@@ -868,16 +818,18 @@
             e.preventDefault();
             const name = document.getElementById('custName').value.trim();
             const orderType = document.querySelector('input[name="orderType"]:checked').value;
+            const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
             const notes = document.getElementById('custNotes').value.trim();
 
             let message = ` Halo Kedai Dean, saya mau pesan makanan/minuman:\n\n`;
             message += `👤 *Nama Pemesan:* ${name}\n`;
-            message += `🛵 *Tipe Pesanan:* ${orderType}\n`;
+            message += `🛵 *Metode Layanan:* ${orderType}\n`;
+            message += `💳 *Metode Pembayaran:* ${paymentType}\n`;
             if (notes) {
-                message += `📝 *Catatan / Alamat:* ${notes}\n`;
+                message += `📝 *Alamat / No. Meja / Catatan:* ${notes}\n`;
             }
             message += `------------------------------------\n`;
-            message += `📋 *DAFTAR PESANAN:*\n`;
+            message += `📋 *RINCIAN PESANAN:*\n`;
 
             let totalPrice = 0;
             for (let id in cart) {
@@ -900,7 +852,7 @@
             window.open(waUrl, '_blank');
         }
 
-        // Admin Management Logic
+        // Fitur Akses Admin (Logo Tap 5x / Tombol Footer)
         function handleLogoClick() {
             logoClickCount++;
             clearTimeout(logoClickTimer);
@@ -961,7 +913,7 @@
             awayNote = note;
             localStorage.setItem('kd_away_note', awayNote);
             renderStatusBanner();
-            alert('Keterangan istirahat berhasil disimpan!');
+            alert('Pesan istirahat berhasil disimpan!');
         }
 
         function saveWaNumber() {
@@ -970,7 +922,7 @@
                 waNumber = num;
                 localStorage.setItem('kd_wa_num', waNumber);
                 document.getElementById('footerWaText').innerText = '+' + waNumber;
-                alert('Nomor WhatsApp Kedai berhasil diperbarui!');
+                alert('Nomor WhatsApp Kedai diperbarui!');
             }
         }
 
@@ -982,7 +934,7 @@
                 document.getElementById('adminChangePinInput').value = '';
                 alert('PIN Admin baru berhasil disimpan!');
             } else {
-                alert('PIN minimal harus 4 digit!');
+                alert('PIN minimal 4 digit!');
             }
         }
 
@@ -992,7 +944,6 @@
             renderMenuGrid();
         }
 
-        // FUNGSI UNGGAH FOTO BERKAS (IMAGE UPLOAD FILE)
         function handleImageFileUpload(e) {
             const file = e.target.files[0];
             if (file) {
@@ -1017,7 +968,6 @@
             document.getElementById('uploadFileLabel').innerText = "Pilih File Foto...";
         }
 
-        // Menu Add / Edit Modals
         function openAddMenuModal() {
             document.getElementById('menuFormId').value = '';
             document.getElementById('menuFormName').value = '';
@@ -1060,7 +1010,6 @@
             }
 
             document.getElementById('menuFormIsReady').checked = item.isReady;
-
             document.getElementById('menuModalTitle').innerText = 'Edit Menu';
             document.getElementById('menuModal').classList.remove('hidden');
         }
@@ -1081,16 +1030,13 @@
             const urlImg = document.getElementById('menuFormImageUrl').value.trim();
             const isReady = document.getElementById('menuFormIsReady').checked;
 
-            // Prioritaskan file foto yang diunggah, baru kemudian URL link jika tidak ada file
             const finalImage = uploadedBase64Image || urlImg;
 
             if (id) {
-                // Edit mode
                 menus = menus.map(m => m.id == id ? {
                     ...m, name, category, price, desc, emoji, image: finalImage, isReady
                 } : m);
             } else {
-                // New menu
                 const newId = Date.now();
                 menus.push({
                     id: newId, name, category, price, desc, emoji, image: finalImage, isReady
